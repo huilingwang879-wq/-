@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>篮球比赛报名</title>
+  <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+  <div id="app">
+    <!-- 登录/注册页面 -->
+    <div id="auth-page" class="page">
+      <div class="login-card">
+        <div class="logo">🏀</div>
+        <div class="title">篮球比赛报名</div>
+        
+        <div id="error-msg" class="error-msg hidden"></div>
+
+        <!-- 登录面板 -->
+        <div id="login-panel" class="panel">
+          <div class="subtitle">用户登录</div>
+          
+          <div class="form-item">
+            <label class="label">姓名</label>
+            <input type="text" id="login-name" class="input" placeholder="请输入姓名">
+          </div>
+
+          <div class="form-item">
+            <label class="label">密码</label>
+            <input type="password" id="login-password" class="input" placeholder="请输入密码">
+          </div>
+
+          <div class="remember-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="remember-password">
+              <span>记住密码</span>
+            </label>
+          </div>
+
+          <button id="btn-login" class="btn-primary">登录</button>
+
+          <div class="link-row">
+            <span class="link" onclick="switchPanel('register')">注册账号</span>
+          </div>
+        </div>
+
+        <!-- 注册面板 -->
+        <div id="register-panel" class="panel hidden">
+          <div class="subtitle">注册账号</div>
+          <div class="tip-text">注册后需等待管理员审核通过才能登录</div>
+          
+          <div class="form-item">
+            <label class="label">姓名 *</label>
+            <input type="text" id="register-name" class="input" placeholder="请输入真实姓名">
+          </div>
+
+          <div class="form-item">
+            <label class="label">密码 *</label>
+            <input type="password" id="register-password" class="input" placeholder="请输入6位数字密码" maxlength="6">
+          </div>
+
+          <div class="form-item">
+            <label class="label">确认密码 *</label>
+            <input type="password" id="register-confirm" class="input" placeholder="请再次输入密码" maxlength="6">
+          </div>
+
+          <div class="form-item">
+            <label class="label">默认队伍</label>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="register-team" value="redBlack" checked>
+                <span class="radio-text red-black">🔴⚫ 红黑队</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="register-team" value="whiteBlue">
+                <span class="radio-text white-blue">⚪🔵 白蓝队</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="tip-text password-tip">密码必须为6位数字</div>
+
+          <button id="btn-register" class="btn-primary">提交注册</button>
+
+          <div class="link-row">
+            <span class="link" onclick="switchPanel('login')">已有账号？去登录</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主页面 -->
+    <div id="main-page" class="page hidden">
+      <!-- 导航栏 -->
+      <nav class="tab-bar">
+        <div class="tab active" data-tab="signup">报名</div>
+        <div class="tab" data-tab="stats">统计</div>
+        <div class="tab" data-tab="admin">管理</div>
+      </nav>
+
+      <!-- 报名页面 -->
+      <div id="signup-tab" class="tab-content">
+        <div class="match-info">
+          <h3 id="match-name">篮球友谊赛</h3>
+          <p id="match-date">📅 2026-03-25</p>
+          <p id="match-venue">📍 学校体育馆</p>
+          <p id="deadline-info" class="deadline"></p>
+        </div>
+
+        <div id="restriction-warning" class="restriction-warning hidden">
+          <p>⚠️ 您已被限制报名</p>
+          <p id="restriction-detail"></p>
+        </div>
+
+        <!-- 报名操作区域 -->
+        <div id="signup-action-area" class="signup-action-area">
+          <!-- 未报名状态 -->
+          <div id="signup-form" class="signup-form">
+            <div class="form-item">
+              <label class="label">选择队伍</label>
+              <div class="radio-group">
+                <label class="radio-item team-option">
+                  <input type="radio" name="signup-team" value="redBlack">
+                  <span class="radio-text red-black">🔴⚫ 红黑队</span>
+                </label>
+                <label class="radio-item team-option">
+                  <input type="radio" name="signup-team" value="whiteBlue">
+                  <span class="radio-text white-blue">⚪🔵 白蓝队</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="signup-warning" class="warning hidden"></div>
+
+            <button id="btn-submit-signup" class="btn-primary">确认报名</button>
+          </div>
+
+          <!-- 已报名状态 -->
+          <div id="my-signup" class="my-signup hidden">
+            <div class="signup-status-card">
+              <div class="status-header">
+                <span class="status-badge">✓ 已报名</span>
+                <span id="my-team" class="team-badge"></span>
+              </div>
+              <div class="signup-info">
+                <p>报名时间：<span id="signup-time">--</span></p>
+              </div>
+              <div class="action-buttons">
+                <button id="btn-cancel-signup" class="btn-outline-danger">
+                  <span class="icon">✕</span> 取消报名
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 未登录/截止状态 -->
+          <div id="signup-closed" class="signup-closed hidden">
+            <p class="closed-text">⏰ 报名已截止</p>
+          </div>
+        </div>
+
+        <!-- 已报名队员展示 -->
+        <div class="teams-section">
+          <div class="team-box red-black-box">
+            <div class="team-header">
+              <span class="team-icon">🔴⚫</span>
+              <span class="team-name">红黑队</span>
+              <span class="team-count" id="redblack-count">0</span>
+            </div>
+            <ul id="redblack-list" class="player-list"></ul>
+            <div class="team-empty" id="redblack-empty">暂无队员报名</div>
+          </div>
+          <div class="team-box white-blue-box">
+            <div class="team-header">
+              <span class="team-icon">⚪🔵</span>
+              <span class="team-name">白蓝队</span>
+              <span class="team-count" id="whiteblue-count">0</span>
+            </div>
+            <ul id="whiteblue-list" class="player-list"></ul>
+            <div class="team-empty" id="whiteblue-empty">暂无队员报名</div>
+          </div>
+        </div>
+
+        <div class="total-info">
+          总人数：<span id="total-players">0</span> / <span id="max-players">20</span> 人
+        </div>
+
+        <button id="btn-logout" class="btn-text">退出登录</button>
+      </div>
+
+      <!-- 统计页面 -->
+      <div id="stats-tab" class="tab-content hidden">
+        <!-- 队伍战绩 -->
+        <div class="team-stats-section">
+          <h3>🏆 队伍战绩</h3>
+          <div class="team-stats-cards">
+            <div class="team-stat-card red-black-card">
+              <div class="team-stat-icon">🔴⚫</div>
+              <div class="team-stat-name">红黑队</div>
+              <div class="team-stat-wins">
+                <span class="wins-number" id="redblack-wins">0</span>
+                <span class="wins-label">胜</span>
+              </div>
+            </div>
+            <div class="team-stat-card white-blue-card">
+              <div class="team-stat-icon">⚪🔵</div>
+              <div class="team-stat-name">白蓝队</div>
+              <div class="team-stat-wins">
+                <span class="wins-number" id="whiteblue-wins">0</span>
+                <span class="wins-label">胜</span>
+              </div>
+            </div>
+          </div>
+          <div class="total-matches">
+            总场次：<span id="total-matches">0</span>
+          </div>
+        </div>
+
+        <h3>参赛统计</h3>
+        <div id="stats-list" class="stats-list"></div>
+        
+        <h3>历史比赛</h3>
+        <div id="match-history" class="match-history"></div>
+      </div>
+
+      <!-- 管理页面 -->
+      <div id="admin-tab" class="tab-content hidden">
+        <div id="admin-notice" class="admin-notice hidden">
+          <p>⚠️ 您不是管理员，无法访问此页面</p>
+        </div>
+
+        <div id="admin-content">
+          <div class="admin-section">
+            <h4>待审核用户</h4>
+            <div id="pending-list" class="admin-list"></div>
+          </div>
+
+          <div class="admin-section">
+            <h4>比赛设置</h4>
+            <div class="form-item">
+              <label class="label">比赛名称</label>
+              <input type="text" id="admin-match-name" class="input">
+            </div>
+            <div class="form-item">
+              <label class="label">比赛日期</label>
+              <input type="date" id="admin-match-date" class="input">
+            </div>
+            <div class="form-item">
+              <label class="label">比赛地点</label>
+              <input type="text" id="admin-match-venue" class="input">
+            </div>
+            <div class="form-item">
+              <label class="label">最大报名人数</label>
+              <input type="number" id="admin-max-players" class="input" min="1" max="100">
+            </div>
+            <button id="btn-save-match" class="btn-primary">保存设置</button>
+          </div>
+
+          <div class="admin-section">
+            <h4>记录比赛结果</h4>
+            <div class="form-item">
+              <label class="label">红黑队比分</label>
+              <input type="number" id="score-redblack" class="input" min="0">
+            </div>
+            <div class="form-item">
+              <label class="label">白蓝队比分</label>
+              <input type="number" id="score-whiteblue" class="input" min="0">
+            </div>
+            <div class="form-item">
+              <label class="label">MVP（选填）</label>
+              <select id="mvp-name" class="input">
+                <option value="">-- 请选择MVP（从已报名队员中选择）--</option>
+              </select>
+            </div>
+            <button id="btn-record-match" class="btn-primary">记录比赛</button>
+          </div>
+
+          <div class="admin-section">
+            <h4>历史比赛管理</h4>
+            <div id="match-management-list" class="admin-list"></div>
+          </div>
+
+          <div class="admin-section">
+            <h4>队员行为记录</h4>
+            <div class="form-item">
+              <label class="label">行为类型</label>
+              <select id="behavior-type" class="input" onchange="onBehaviorTypeChange()">
+                <option value="noShow">放鸽子（报名后未到场）</option>
+                <option value="unregistered">未报名参赛</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label class="label">队员姓名</label>
+              <select id="behavior-name" class="input">
+                <option value="">-- 请选择队员 --</option>
+              </select>
+              <div id="behavior-hint" class="behavior-hint">从已报名队员中选择</div>
+            </div>
+            <button id="btn-record-behavior" class="btn-primary">记录行为</button>
+          </div>
+
+          <div class="admin-section">
+            <h4>清除违规记录</h4>
+            <div class="form-item">
+              <label class="label">选择队员</label>
+              <select id="clear-behavior-name" class="input">
+                <option value="">-- 请选择队员 --</option>
+              </select>
+            </div>
+            <div id="clear-behavior-info" class="behavior-hint">选择有违规记录的队员</div>
+            <button id="btn-clear-behavior" class="btn-primary">清除违规记录</button>
+          </div>
+
+          <div class="admin-section">
+            <h4>数据重置</h4>
+            <div class="form-item">
+              <label class="label">管理员密码</label>
+              <input type="password" id="reset-password" class="input" placeholder="请输入管理员密码">
+            </div>
+            <button id="btn-reset-all-stats" class="btn-danger">重置所有队员统计</button>
+            <button id="btn-clear-all-behavior" class="btn-danger" style="margin-top: 10px;">清除所有违规记录</button>
+          </div>
+
+          <div class="admin-section">
+            <h4>管理员管理</h4>
+            <div class="form-item">
+              <label class="label">添加管理员（从注册队员中选择，最多3人）</label>
+              <select id="new-admin-name" class="input">
+                <option value="">-- 请选择队员 --</option>
+              </select>
+            </div>
+            <button id="btn-add-admin" class="btn-primary">添加管理员</button>
+            <div id="admin-list" class="admin-list" style="margin-top: 15px;"></div>
+          </div>
+
+          <div class="admin-section">
+            <h4>注册队员管理</h4>
+            <div id="user-management-list" class="admin-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=2"></script>
+</body>
+</html>
