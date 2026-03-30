@@ -624,7 +624,7 @@ function loadStatsPage() {
           <div class="stat-left">
             <span class="stat-name">${user.name}</span>
             <div class="stat-badges">
-              ${user.mvpCount > 0 ? `<span class="badge mvp-badge">👑 MVP ${user.mvpCount}</span>` : ''}
+              ${user.mvpCount > 0 ? `<span class="badge mvp-badge" onclick="showMVPDetails('${user.name}')" style="cursor:pointer;" title="点击查看详情">👑 MVP ${user.mvpCount}</span>` : ''}
               ${user.violations > 0 ? `<span class="badge violation-badge">⚠️ 违规 ${user.violations}</span>` : ''}
             </div>
           </div>
@@ -764,8 +764,19 @@ function recordMatch() {
   });
   
   // 记录MVP
-  if (mvp && AppData.playerStats[mvp]) {
+  if (mvp) {
+    if (!AppData.playerStats[mvp]) {
+      AppData.playerStats[mvp] = { count: 0, history: [], mvpHistory: [], mvpCount: 0 };
+    }
     AppData.playerStats[mvp].mvpCount++;
+    // 记录MVP日期
+    if (!AppData.playerStats[mvp].mvpHistory) {
+      AppData.playerStats[mvp].mvpHistory = [];
+    }
+    AppData.playerStats[mvp].mvpHistory.push({
+      date: AppData.matchInfo.date,
+      matchName: AppData.matchInfo.name
+    });
   }
   
   // 保存历史（包含参赛队员名单，用于删除时扣除统计）
@@ -1300,6 +1311,22 @@ function clearAllBehavior() {
   saveData();
   alert('已清除所有队员的违规记录');
   loadAdminPage();
+}
+
+// 显示MVP详情
+function showMVPDetails(playerName) {
+  const stats = AppData.playerStats[playerName];
+  if (!stats || !stats.mvpHistory || stats.mvpHistory.length === 0) {
+    alert(`${playerName} 没有MVP记录`);
+    return;
+  }
+  
+  let details = `${playerName} 的MVP记录：\n\n`;
+  stats.mvpHistory.forEach((mvp, index) => {
+    details += `${index + 1}. ${mvp.date} - ${mvp.matchName}\n`;
+  });
+  
+  alert(details);
 }
 
 // ==================== 标签切换 ====================
