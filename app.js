@@ -1,4 +1,9 @@
-// 数据存储（使用 localStorage）
+// JSONBin 配置
+const JSONBIN_API_KEY = '$2a$10$/hG.y3ytVQkHOqxQFDVp9.bwV8YnzrIsnZzvNwcpMuduOkUAnYmQK';
+const JSONBIN_BIN_ID = '69c9f239856a682189deb25b';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+// 数据存储
 const Storage = {
   get(key) {
     const data = localStorage.getItem(key);
@@ -13,7 +18,7 @@ const Storage = {
 };
 
 // 全局数据
-const AppData = {
+let AppData = {
   matchInfo: {
     name: '篮球友谊赛',
     date: '2026-03-25',
@@ -33,17 +38,64 @@ const AppData = {
   pendingApprovals: []
 };
 
-// 初始化数据
-function initData() {
+// 从 JSONBin 加载数据
+async function loadDataFromServer() {
+  try {
+    const response = await fetch(`${JSONBIN_URL}/latest`, {
+      headers: {
+        'X-Master-Key': JSONBIN_API_KEY
+      }
+    });
+    if (response.ok) {
+      const result = await response.json();
+      if (result.record) {
+        AppData = { ...AppData, ...result.record };
+        console.log('从云端加载数据成功');
+        return true;
+      }
+    }
+  } catch (error) {
+    console.error('加载数据失败:', error);
+  }
+  // 回退到本地存储
   const saved = Storage.get('basketballData');
   if (saved) {
     Object.assign(AppData, saved);
   }
-  saveData();
+  return false;
+}
+
+// 保存数据到 JSONBin
+async function saveDataToServer() {
+  try {
+    const response = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_API_KEY
+      },
+      body: JSON.stringify(AppData)
+    });
+    if (response.ok) {
+      console.log('数据已同步到云端');
+      return true;
+    }
+  } catch (error) {
+    console.error('保存数据失败:', error);
+  }
+  return false;
+}
+
+// 初始化数据
+async function initData() {
+  await loadDataFromServer();
 }
 
 function saveData() {
+  // 保存到本地
   Storage.set('basketballData', AppData);
+  // 保存到云端
+  saveDataToServer();
 }
 
 // 生成随机token
@@ -1271,8 +1323,8 @@ function switchTab(tabName) {
 
 // ==================== 初始化 ====================
 
-document.addEventListener('DOMContentLoaded', () => {
-  initData();
+document.addEventListener('DOMContentLoaded', async () => {
+  await initData();
   loadRememberedPassword();
   
   // 登录/注册按钮
